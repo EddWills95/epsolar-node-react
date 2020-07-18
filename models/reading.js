@@ -16,9 +16,10 @@ module.exports = (sequelize, DataTypes) => {
   Reading.init({
     datetime: DataTypes.DATE,
     solar_voltage: DataTypes.FLOAT,
-    solar_voltage: DataTypes.FLOAT,
+    solar_current: DataTypes.FLOAT,
     battery_voltage: DataTypes.FLOAT,
-    charging_voltage: DataTypes.FLOAT
+    charging_current: DataTypes.FLOAT,
+    state_of_charge: DataTypes.FLOAT
   }, {
     sequelize,
     modelName: 'Reading',
