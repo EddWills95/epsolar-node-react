@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import { socketUrl } from "./constants";
 
 import logo from "./logo.svg";
 import "./App.css";
+import Container from "./components/container";
 
 const App = () => {
-    const socketUrl = process.env.REACT_APP_ENDPOINT || "ws://localhost:8080";
-    console.log(socketUrl);
-
     const [messages, setMessages] = useState([]);
     const webSocket = useRef(null);
 
@@ -26,21 +25,11 @@ const App = () => {
 
     return (
         <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    This should change something
-                </a>
-                {messages}
-            </header>
+            <p>EP Solar - Pi</p>
+            {messages}
+            <Container>
+                <h2>HELLO</h2>
+            </Container>
         </div>
     );
 };
