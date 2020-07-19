@@ -14,7 +14,6 @@
         "express-reload": "^1.2.0",
         "express-ws": "^4.0.0",
         "modbus-serial": "^8.0.0",
-        "node-datetime": "^2.1.2",
         "nodemon": "^2.0.4",
         "sequelize": "^6.3.0",
         "sequelize-cli": "^6.2.0",
