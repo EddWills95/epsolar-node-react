@@ -8,6 +8,7 @@ var sequelize = new Sequelize("example", "root", "", {
     operatorsAliases: false,
     // SQLite database path
     storage: "./data/tracer-pi.sqlite",
+    logging: false
 });
 
 const Reading = ReadingModel(sequelize, Sequelize);
