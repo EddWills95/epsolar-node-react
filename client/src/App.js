@@ -18,7 +18,11 @@ const App = () => {
     };
 
     useEffect(() => {
-        webSocket.current = new WebSocket(socketUrl);
+        try {
+            webSocket.current = new WebSocket(socketUrl);
+        } catch (error) {
+            console.log(error);
+        }
 
         webSocket.current.onopen = () => {
             console.log("websocket opened");
