@@ -1,35 +1,59 @@
 import React, { useState, useEffect, useRef } from "react";
+
 import { socketUrl } from "./constants";
 
-import logo from "./logo.svg";
-import "./App.css";
-import Container from "./components/container";
+import Data from "./components/data";
+
+import "./App.scss";
 
 const App = () => {
-    const [messages, setMessages] = useState([]);
+    const [time, setTime] = useState(new Date().toLocaleString());
+    const [streamingData, setStreamingData] = useState("{}");
     const webSocket = useRef(null);
+
+    const splitData = () => {
+        const entries = Object.entries(JSON.parse(streamingData)) || [];
+        // Remove datetime entry
+        return entries.filter(([key, value]) => key !== "datetime");
+    };
 
     useEffect(() => {
         webSocket.current = new WebSocket(socketUrl);
+
         webSocket.current.onopen = () => {
             console.log("websocket opened");
         };
+
         webSocket.current.onmessage = (message) => {
-            setMessages((prev) => [...prev, message.data]);
+            // setMessages((prev) => [...prev, message.data]);
+            message && setStreamingData(message.data);
         };
+
         return () => {
             console.log("closing socket");
             webSocket.current.close();
         };
     }, []);
 
+    useEffect(() => {
+        setInterval(() => {
+            setTime(new Date().toLocaleString());
+        }, 1000);
+    }, []);
+
+    // We should pass the data to the container which then splits it up into the relevant sections.
+
     return (
-        <div className="App">
+        <div className="app">
+            {" "}
             <p>EP Solar - Pi</p>
-            {messages}
-            <Container>
-                <h2>HELLO</h2>
-            </Container>
+            <span>{time}</span>
+            <div className="container">
+                {" "}
+                {splitData().map(([key, value]) => (
+                    <Data name={key} value={value} key={key} />
+                ))}
+            </div>{" "}
         </div>
     );
 };

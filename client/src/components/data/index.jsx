@@ -1,10 +1,10 @@
 import React from "react";
 
 const Data = ({ name, value }) => (
-  <div>
-    <p>{name}</p>
-    <p>{value}</p>
-  </div>
+    <div className="data">
+        <h3 className="title">{name}</h3>
+        <p>{value}</p>
+    </div>
 );
 
 export default Data;

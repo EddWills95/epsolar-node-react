@@ -1,0 +1,27 @@
+.app {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .container {
+        margin: 24px auto;
+        display: flex;
+        flex-flow: row wrap;
+        width: 65%;
+        justify-content: space-evenly;
+
+        .data {
+            flex: 1;
+            min-width: 33%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            .title {
+                margin: 0;
+            }
+        }
+    }
+}
