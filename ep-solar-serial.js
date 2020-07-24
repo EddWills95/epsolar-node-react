@@ -1,16 +1,15 @@
 const ModbusRTU = require("modbus-serial");
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 class EPSolarSerial {
     client;
 
-    constructor() {
+    constructor(serialAddress = "/dev/ttyUSB0") {
         this.client = new ModbusRTU();
+        this.serialAddress = serialAddress
     }
 
     connect = () => {
-        return this.client.connectRTU("/dev/ttyUSB0", { baudRate: 115200 });
+        return this.client.connectRTU(this.serialAddress, { baudRate: 115200 });
     }
 
     getStats = async () => {
@@ -90,23 +89,23 @@ class EPSolarSerial {
             console.log(error)
         }
     }
-
-    // const [solar_voltage, solar_current, _a, _b, battery_voltage, charging_current] = data.data.map(d => parseFloat(d) / 100);
-
 }
 
 module.exports = EPSolarSerial;
 
 const EPSolar = new EPSolarSerial();
 
+const getData = async () => {
+    const dayNight = await EPSolar.getDayNight()
+
+    const liveData = await EPSolar.getLiveData();
+
+    const stats = await EPSolar.getStats();
+
+    console.log({ dayNight, liveData, stats });
+};
+
 EPSolar.connect().then(() => {
-    EPSolar.getDayNight().then(dayNight => console.log(dayNight));
-
-    // EPSolar.getLiveData().then(data => {
-    //     console.log('livedata', data);
-    // }).catch(error => console.log(error));
-
-    // EPSolar.getStats().then((data) => {
-    //     console.log('stats', data);
-    // }).catch(error => console.log(error));
+    getData();
 });
+
