@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import "./style.scss";
 
-const Battery = ({ state }) => {
+const Battery = ({ state = 0 }) => {
     const calculateWidth = () => {
         const newWidth = (state * 100) / 4;
         return `${newWidth}px`;
@@ -18,6 +18,7 @@ const Battery = ({ state }) => {
                 ></div>
             </div>
             <div className="batteryBump"></div>
+            <span>{state * 100}%</span>
         </div>
     );
 };

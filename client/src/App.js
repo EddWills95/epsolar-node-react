@@ -5,16 +5,25 @@ import { socketUrl } from "./constants";
 import Data from "./components/data";
 
 import "./App.scss";
+import Battery from "./components/battery";
 
 const App = () => {
     const [time, setTime] = useState(new Date().toLocaleString());
     const [streamingData, setStreamingData] = useState("{}");
     const webSocket = useRef(null);
 
+    const stateOfCharge = () => {
+        return JSON.parse(streamingData)["state_of_charge"];
+    };
+
     const splitData = () => {
         const entries = Object.entries(JSON.parse(streamingData)) || [];
         // Remove datetime entry
-        return entries.filter(([key, value]) => key !== "datetime");
+        return entries.filter(([key, value]) => {
+            if (key === "datetime") return false;
+            if (key === "state_of_charge") return false;
+            return true;
+        });
     };
 
     useEffect(() => {
@@ -30,7 +39,11 @@ const App = () => {
 
         webSocket.current.onmessage = (message) => {
             // setMessages((prev) => [...prev, message.data]);
-            message && setStreamingData(message.data);
+            try {
+                setStreamingData(message.data);
+            } catch (error) {
+                console.log(Error);
+            }
         };
 
         return () => {
@@ -49,9 +62,10 @@ const App = () => {
 
     return (
         <div className="app">
-            {" "}
-            <p>EP Solar - Pi</p>
-            <span>{time}</span>
+            <div className="header">
+                <p>EP Solar - Pi</p>
+                <Battery state={stateOfCharge()} />
+            </div>
             <div className="container">
                 {" "}
                 {splitData().map(([key, value]) => (
