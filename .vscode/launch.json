@@ -5,9 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run EP Solar",
+            "program": "${workspaceFolder}/ep-solar-serial.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
+            "name": "Launch Server",
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
             ],
