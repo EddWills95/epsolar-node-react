@@ -13,10 +13,12 @@ var sequelize = new Sequelize("example", "root", "", {
 
 const Reading = ReadingModel(sequelize, Sequelize);
 
-sequelize.sync({ force: true }).then(() => {
-    console.log(`Database & tables created!`);
-});
+const initialSync = () => {
+    return sequelize.sync({ force: true });
+};
+
 
 module.exports = {
+    initialSync,
     Reading,
 };
