@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 
-// import { socketUrl } from "./constants";
+import { socketUrl } from "./constants";
 
 import Data from "./components/data";
 import Battery from "./components/battery";
 
 import "./App.scss";
-
-const socketUrl = `ws://${process.env.REACT_APP_ENDPOINT || "localhost"}:8080`;
 
 const App = () => {
     const [streamingData, setStreamingData] = useState({
