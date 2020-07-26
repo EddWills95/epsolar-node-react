@@ -1,46 +1,77 @@
 import React, { useState, useEffect, useRef } from "react";
 
-import logo from "./logo.svg";
-import "./App.css";
+import { socketUrl } from "./constants";
+
+import Data from "./components/data";
+
+import "./App.scss";
+import Battery from "./components/battery";
 
 const App = () => {
-    const socketUrl = process.env.REACT_APP_ENDPOINT || "ws://localhost:8080";
-    console.log(socketUrl);
-
-    const [messages, setMessages] = useState([]);
+    const [time, setTime] = useState(new Date().toLocaleString());
+    const [streamingData, setStreamingData] = useState("{}");
     const webSocket = useRef(null);
 
+    const stateOfCharge = () => {
+        return JSON.parse(streamingData)["state_of_charge"];
+    };
+
+    const splitData = () => {
+        const entries = Object.entries(JSON.parse(streamingData)) || [];
+        // Remove datetime entry
+        return entries.filter(([key, value]) => {
+            if (key === "datetime") return false;
+            if (key === "state_of_charge") return false;
+            return true;
+        });
+    };
+
     useEffect(() => {
-        webSocket.current = new WebSocket(socketUrl);
+        try {
+            webSocket.current = new WebSocket(socketUrl);
+        } catch (error) {
+            console.log(error);
+        }
+
         webSocket.current.onopen = () => {
             console.log("websocket opened");
         };
+
         webSocket.current.onmessage = (message) => {
-            setMessages((prev) => [...prev, message.data]);
+            // setMessages((prev) => [...prev, message.data]);
+            try {
+                setStreamingData(message.data);
+            } catch (error) {
+                console.log(Error);
+            }
         };
+
         return () => {
             console.log("closing socket");
             webSocket.current.close();
         };
     }, []);
 
+    useEffect(() => {
+        setInterval(() => {
+            setTime(new Date().toLocaleString());
+        }, 1000);
+    }, []);
+
+    // We should pass the data to the container which then splits it up into the relevant sections.
+
     return (
-        <div className="App">
-            <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <p>
-                    Edit <code>src/App.js</code> and save to reload.
-                </p>
-                <a
-                    className="App-link"
-                    href="https://reactjs.org"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    This should change something
-                </a>
-                {messages}
-            </header>
+        <div className="app">
+            <div className="header">
+                <p>EP Solar - Pi</p>
+                <Battery state={stateOfCharge()} />
+            </div>
+            <div className="container">
+                {" "}
+                {splitData().map(([key, value]) => (
+                    <Data name={key} value={value} key={key} />
+                ))}
+            </div>{" "}
         </div>
     );
 };
