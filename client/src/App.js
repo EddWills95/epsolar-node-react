@@ -3,28 +3,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { socketUrl } from "./constants";
 
 import Data from "./components/data";
-
-import "./App.scss";
 import Battery from "./components/battery";
 
+import "./App.scss";
+
 const App = () => {
-    const [time, setTime] = useState(new Date().toLocaleString());
-    const [streamingData, setStreamingData] = useState("{}");
+    const [streamingData, setStreamingData] = useState({
+        solarData: [],
+        batteryData: [],
+        generationStats: [],
+    });
     const webSocket = useRef(null);
-
-    const stateOfCharge = () => {
-        return JSON.parse(streamingData)["state_of_charge"];
-    };
-
-    const splitData = () => {
-        const entries = Object.entries(JSON.parse(streamingData)) || [];
-        // Remove datetime entry
-        return entries.filter(([key, value]) => {
-            if (key === "datetime") return false;
-            if (key === "state_of_charge") return false;
-            return true;
-        });
-    };
 
     useEffect(() => {
         try {
@@ -38,11 +27,10 @@ const App = () => {
         };
 
         webSocket.current.onmessage = (message) => {
-            // setMessages((prev) => [...prev, message.data]);
             try {
-                setStreamingData(message.data);
+                setStreamingData(JSON.parse(message.data));
             } catch (error) {
-                console.log(Error);
+                console.log(error);
             }
         };
 
@@ -52,26 +40,65 @@ const App = () => {
         };
     }, []);
 
-    useEffect(() => {
-        setInterval(() => {
-            setTime(new Date().toLocaleString());
-        }, 1000);
-    }, []);
-
-    // We should pass the data to the container which then splits it up into the relevant sections.
+    const generateSuffix = (label) => {
+        const lowerCaseLabel = label.toLowerCase();
+        if (lowerCaseLabel.includes("voltage")) return "V";
+        if (lowerCaseLabel.includes("power")) return "W";
+        if (lowerCaseLabel.includes("current")) return "A";
+        if (lowerCaseLabel.includes("generated")) return "kW/h";
+    };
 
     return (
         <div className="app">
             <div className="header">
                 <p>EP Solar - Pi</p>
-                <Battery state={stateOfCharge()} />
             </div>
             <div className="container">
-                {" "}
-                {splitData().map(([key, value]) => (
-                    <Data name={key} value={value} key={key} />
-                ))}
-            </div>{" "}
+                <div className="data-container">
+                    <h2 className="data-container__title">Solar</h2>
+                    {streamingData.solarData.map((data, index) => (
+                        <div className="data-container__data" key={index}>
+                            <p> {data.label}</p>{" "}
+                            <p>
+                                {" "}
+                                {data.value}
+                                <span className="data-container__data__suffix">
+                                    {generateSuffix(data.label)}
+                                </span>
+                            </p>
+                        </div>
+                    ))}
+                </div>
+                <div className="data-container">
+                    <h2 className="data-container__title">Battery</h2>
+                    {streamingData.batteryData.map((data, index) => (
+                        <div className="data-container__data" key={index}>
+                            <p> {data.label}</p>{" "}
+                            <p>
+                                {" "}
+                                {data.value}
+                                <span className="data-container__data__suffix">
+                                    {generateSuffix(data.label)}
+                                </span>
+                            </p>
+                        </div>
+                    ))}
+                </div>
+                <div className="data-container">
+                    <h2 className="data-container__title">Energy Generation</h2>
+                    {streamingData.generationStats.map((data, index) => (
+                        <div className="data-container__data" key={index}>
+                            <p>{data.label}</p>
+                            <p>
+                                {data.value}
+                                <span className="data-container__data__suffix">
+                                    {generateSuffix(data.label)}
+                                </span>
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };
