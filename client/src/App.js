@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { socketUrl } from "./constants";
 
-import Data from "./components/data";
 import Battery from "./components/battery";
+import Data from "./components/data";
 
 import "./App.scss";
 
@@ -40,64 +40,35 @@ const App = () => {
         };
     }, []);
 
-    const generateSuffix = (label) => {
-        const lowerCaseLabel = label.toLowerCase();
-        if (lowerCaseLabel.includes("voltage")) return "V";
-        if (lowerCaseLabel.includes("power")) return "W";
-        if (lowerCaseLabel.includes("current")) return "A";
-        if (lowerCaseLabel.includes("generated")) return "kW/h";
+    const stateOfChange = () => {
+        const SOC = streamingData.batteryData.find(
+            (d) => d.label === "Battery SOC"
+        );
+        if (!SOC) return 0;
+        return SOC.value;
     };
 
     return (
         <div className="app">
             <div className="header">
                 <p>EP Solar - Pi</p>
+                <Battery state={stateOfChange()} />
             </div>
             <div className="container">
-                <div className="data-container">
-                    <h2 className="data-container__title">Solar</h2>
-                    {streamingData.solarData.map((data, index) => (
-                        <div className="data-container__data" key={index}>
-                            <p> {data.label}</p>{" "}
-                            <p>
-                                {" "}
-                                {data.value}
-                                <span className="data-container__data__suffix">
-                                    {generateSuffix(data.label)}
-                                </span>
-                            </p>
-                        </div>
-                    ))}
-                </div>
-                <div className="data-container">
-                    <h2 className="data-container__title">Battery</h2>
-                    {streamingData.batteryData.map((data, index) => (
-                        <div className="data-container__data" key={index}>
-                            <p> {data.label}</p>{" "}
-                            <p>
-                                {" "}
-                                {data.value}
-                                <span className="data-container__data__suffix">
-                                    {generateSuffix(data.label)}
-                                </span>
-                            </p>
-                        </div>
-                    ))}
-                </div>
-                <div className="data-container">
-                    <h2 className="data-container__title">Energy Generation</h2>
-                    {streamingData.generationStats.map((data, index) => (
-                        <div className="data-container__data" key={index}>
-                            <p>{data.label}</p>
-                            <p>
-                                {data.value}
-                                <span className="data-container__data__suffix">
-                                    {generateSuffix(data.label)}
-                                </span>
-                            </p>
-                        </div>
-                    ))}
-                </div>
+                <Data
+                    title="Solar"
+                    data={streamingData.solarData}
+                    endpoint="solar"
+                />
+                <Data
+                    title="Battery"
+                    data={streamingData.batteryData}
+                    endpoint="battery"
+                />
+                <Data
+                    title="Generation Stats"
+                    data={streamingData.generationStats}
+                />
             </div>
         </div>
     );
