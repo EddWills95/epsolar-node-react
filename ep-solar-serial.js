@@ -45,7 +45,7 @@ class EPSolarSerial {
             "Generated energy this month": 0x330e, // -330F
             "Generated energy this year": 0x3310, // -3311
             "Total generated energy": 0x3312, // -3313
-            "Carbon dioxide reduction": 0x3314, // -3315
+            // "Carbon dioxide reduction": 0x3314, // -3315
         };
 
         return await this._readRegisters(locations);

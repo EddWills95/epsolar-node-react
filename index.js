@@ -1,5 +1,5 @@
 // Sequelize stuff
-const { initialSync, Reading } = require("./sequelize");
+const { initialSync, BatteryVoltage, SolarPower } = require("./sequelize");
 const EPSolarSerial = require("./ep-solar-serial");
 
 // Server stuff
@@ -34,13 +34,22 @@ app.get("/", function (req, res) {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
 
-// Add readings endpoint (for later)
-app.get("/readings", (req, res) => {
-    Reading.findAll({
+app.get("/battery", (req, res) => {
+    // Need to do some general things over time
+    BatteryVoltage.findAll({
         limit: req.query.limit,
         order: [["datetime", "DESC"]],
-    }).then((readings) => {
-        res.json(readings);
+    }).then((battery) => {
+        res.json(battery);
+    });
+});
+
+app.get("/solar", (req, res) => {
+    SolarPower.findAll({
+        limit: req.query.limit,
+        order: [["datetime", "DESC"]],
+    }).then((solar) => {
+        res.json(solar);
     });
 });
 
@@ -82,10 +91,15 @@ wss.broadcast = (msg) => {
 // Set up the listener
 server.listen(8080);
 
+const findDataValue = (data, label) => {
+    const dataObject = data.find((d) => d.label == label);
+    return dataObject.value;
+};
+
 // Start the data collection after the database has been synced up
 initialSync().then(() => {
     console.log("Sync Complete");
-    const EPSolar = new EPSolarSerial("/dev/ttyUSB1");
+    const EPSolar = new EPSolarSerial("/dev/ttyUSB0");
 
     EPSolar.connect()
         .then(() => {
@@ -95,20 +109,30 @@ initialSync().then(() => {
                 EPSolar.getData()
                     .then((data) => {
                         wss.broadcast(JSON.stringify(data));
+                        const datetime = Date.now();
+
+                        if (
+                            new Date().getMinutes() % 30 === 0 &&
+                            new Date().getSeconds() === 0
+                        ) {
+                            SolarPower.create({
+                                datetime,
+                                value: findDataValue(
+                                    data.solarData,
+                                    "PV array power"
+                                ),
+                            });
+                            BatteryVoltage.create({
+                                datetime,
+                                value: findDataValue(
+                                    data.batteryData,
+                                    "Battery voltage"
+                                ),
+                            });
+                        }
                     })
                     .catch((err) => console.log(err));
-            }, 1000);
+            }, 2000);
         })
         .catch((err) => console.log(err));
 });
-
-// Start the initial fetching from the serial
-
-//     EPSolar.connect().then(() => {
-//         EPSolar.getStats().then((data, err) => {
-//             console.log({ err, data });
-//         }).catch((err) => {
-//             console.log(err);
-//         })
-//     })
-// })
